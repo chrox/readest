@@ -58,6 +58,7 @@
     "updater:default",
     "process:default",
     "process:allow-restart",
-    "cli:default"
+    "cli:default",
+    "window-state:default"
   ]
 }

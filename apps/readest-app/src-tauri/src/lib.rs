@@ -68,6 +68,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init());
 
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_window_state::Builder::default().build());
+
     #[cfg(target_os = "macos")]
     let builder = builder.plugin(tauri_traffic_light_positioner_plugin::init());
 
@@ -117,8 +120,7 @@ pub fn run() {
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("")
                 .inner_size(800.0, 600.0)
-                .resizable(true)
-                .maximized(true);
+                .resizable(true);
 
             #[cfg(target_os = "macos")]
             let win_builder = win_builder
