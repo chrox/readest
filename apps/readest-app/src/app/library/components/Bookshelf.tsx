@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PiPlus } from 'react-icons/pi';
 import { MdDelete, MdOpenInNew } from 'react-icons/md';
 import { MdCheckCircle, MdCheckCircleOutline } from 'react-icons/md';
+import { CiCircleMore } from "react-icons/ci";
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -14,6 +15,7 @@ import { useLibraryStore } from '@/store/libraryStore';
 import { navigateToReader } from '@/utils/nav';
 import Alert from '@/components/Alert';
 import Spinner from '@/components/Spinner';
+import BookDetailModal from '@/components/BookDetailModal';
 
 type BookshelfItem = Book | BooksGroup;
 
@@ -58,6 +60,17 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
   const [clickedImage, setClickedImage] = useState<string | null>(null);
   const [importBookUrl] = useState(searchParams.get('url') || '');
   const isImportingBook = useRef(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+
+  const showMoreDetails = (book: Book) => {
+    setIsModalOpen(true);
+    setSelectedBook(book);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const { setLibrary } = useLibraryStore();
 
@@ -135,9 +148,12 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
               {'format' in item ? (
                 <div
                   className='book-item cursor-pointer'
-                  onClick={() => handleBookClick(item.hash)}
                 >
-                  <div key={(item as Book).hash} className='bg-base-100 shadow-md'>
+                  <div 
+                    key={(item as Book).hash} 
+                    className='bg-base-100 shadow-md'
+                    onClick={() => handleBookClick(item.hash)}
+                  >
                     <div className='relative aspect-[28/41]'>
                       <Image
                         src={item.coverImageUrl!}
@@ -176,10 +192,17 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
                       )}
                     </div>
                   </div>
-                  <div className='card-body p-0 pt-2'>
+                  <div className='card-body flex flex-row items-center justify-between p-0 pt-2'>
                     <h4 className='card-title line-clamp-1 text-[0.6em] text-xs font-semibold'>
                       {(item as Book).title}
                     </h4>
+                    <div
+                      className='card-detail'
+                      role='button'
+                      onClick={showMoreDetails.bind(null, item as Book)}
+                    >
+                      <CiCircleMore size={15} />
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -238,6 +261,11 @@ const Bookshelf: React.FC<BookshelfProps> = ({ libraryBooks, isSelectMode, onImp
           onClickCancel={() => setShowDeleteAlert(false)}
           onClickConfirm={confirmDelete}
         />
+      )}
+      
+      {/* Modal Component */}
+      {selectedBook && (
+        <BookDetailModal isOpen={isModalOpen} onClose={closeModal} book={selectedBook} />
       )}
     </div>
   );
